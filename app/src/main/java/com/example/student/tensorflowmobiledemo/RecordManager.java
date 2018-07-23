@@ -17,7 +17,7 @@ public class RecordManager {
     }
 
     public void record() {
-        
+
     }
 
     public ArrayList<Float> getPredicted() {
@@ -43,5 +43,14 @@ public class RecordManager {
 
     public ArrayList<Float> getActual() {
         return actual;
+    }
+
+    public float calculateAccuracy() {
+        int n = actual.size();
+        int numCorrect = 0;
+        for (int i = 0; i < n; i++) {
+            if (predicted.get(i + 30) == actual.get(i)) numCorrect++;
+        }
+        return numCorrect / (float)n;
     }
 }

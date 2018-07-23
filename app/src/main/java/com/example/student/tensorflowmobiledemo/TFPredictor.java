@@ -4,6 +4,9 @@ import android.content.res.AssetManager;
 
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
+/**
+ * TensorFlow Mobile predictor using pre-trained model to infer the result
+ */
 public class TFPredictor {
     private static String modelFile;
     private static String inputNode;

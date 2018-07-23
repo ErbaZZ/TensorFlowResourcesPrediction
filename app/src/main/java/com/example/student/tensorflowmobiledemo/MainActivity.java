@@ -21,9 +21,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        TFPredictor = new TFPredictor(MODEL_FILE, INPUT_NODE, OUTPUT_NODE, getAssets());
-        cancelAlarm();
-        scheduleAlarm();
+        this.initialize();
         float[] input = {
                 0f,0f,0f,0f,0f,0.69f,1f,1f,0f,
                 0f,0f,0f,0f,0f,0.68f,1f,1f,0f,
@@ -35,15 +33,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Initialize the necessary variables
+     */
+    public void initialize() {
+        TFPredictor = new TFPredictor(MODEL_FILE, INPUT_NODE, OUTPUT_NODE, getAssets());
+        cancelAlarm();
+        scheduleAlarm();
+    }
+
+    /**
+     * Start the schedule to run repeated tasks every interval period
+     */
     public void scheduleAlarm() {
         Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
         final PendingIntent pIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         long firstMillis = System.currentTimeMillis();
         AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-        // Run every minute
-        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, firstMillis, 1000*60, pIntent);
+        int interval = 1000 * 60;   // 1 minute interval
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, firstMillis, interval, pIntent);
     }
 
+    /**
+     * Cancel the repeated tasks schedule
+     */
     public void cancelAlarm() {
         Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
         final PendingIntent pIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);

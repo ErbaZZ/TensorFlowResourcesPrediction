@@ -20,7 +20,7 @@
             android:name=".AlarmReceiver"
             android:process=":remote" />
         <service
-            android:name=".BackgroundService"
+            android:name=".RecordService"
             android:exported="false" />
     </application>
 

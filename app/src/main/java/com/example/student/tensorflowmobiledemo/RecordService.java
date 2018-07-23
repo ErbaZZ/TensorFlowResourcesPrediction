@@ -4,8 +4,11 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
-public class BackgroundService extends IntentService {
-    public BackgroundService() {
+/**
+ * Background service to record the system status every minute
+ */
+public class RecordService extends IntentService {
+    public RecordService() {
         super("BackgroundService");
     }
 
