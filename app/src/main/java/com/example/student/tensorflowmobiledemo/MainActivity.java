@@ -1,5 +1,16 @@
 package com.example.student.tensorflowmobiledemo;
 
+//HEAD
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +19,7 @@ import android.os.BatteryManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
+import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,14 +28,76 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL,0);
-            battery.setText(String.valueOf(level)+"%");
+            int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS,-1);
+            boolean isCharging = status ==BatteryManager.BATTERY_STATUS_CHARGING|| status==BatteryManager.BATTERY_STATUS_FULL;
+            int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+            boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
+            boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
+            String networkInfo = intent.getStringExtra(WifiManager.EXTRA_NETWORK_INFO);
+
+            battery.setText(String.valueOf(level)+"%"+" IsCharging = "+String.valueOf(isCharging)+" USBCharging = "+String.valueOf(usbCharge)+" ACCharging = "+String.valueOf(acCharge)+" " +networkInfo
+            );
         }
     };
+
+
+    private static final String MODEL_FILE = "KerasModelSec2.pb";
+    private static final String INPUT_NODE = "lstm_1_input";
+    private static final String OUTPUT_NODE = "output_node0";
+    private TFPredictor TFPredictor;
+
+//2c37dfa97f1168e610a2751b9455fa7527c583b4
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+// HEAD
         battery = (TextView)this.findViewById(R.id.text1);
         this.registerReceiver(this.aBatInfoReceiver,new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
+        this.initialize();
+        float[] input = {
+                0f,0f,0f,0f,0f,0.69f,1f,1f,0f,
+                0f,0f,0f,0f,0f,0.68f,1f,1f,0f,
+                0f,0f,0f,0f,0f,0.675f,1f,1f,0f};
+        long[] inputDimension = {3, 9, 1};
+        float[] result = TFPredictor.predict(input, inputDimension);
+        for (float r : result) {
+            Log.i("Result", "" + r);
+        }
+    }
+
+    /**
+     * Initialize the necessary variables
+     */
+    public void initialize() {
+        TFPredictor = new TFPredictor(MODEL_FILE, INPUT_NODE, OUTPUT_NODE, getAssets());
+        cancelAlarm();
+        scheduleAlarm();
+    }
+
+    /**
+     * Start the schedule to run repeated tasks every interval period
+     */
+    public void scheduleAlarm() {
+        Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+        final PendingIntent pIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        long firstMillis = System.currentTimeMillis();
+        AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        int interval = 1000 * 60;   // 1 minute interval
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, firstMillis, interval, pIntent);
+    }
+
+    /**
+     * Cancel the repeated tasks schedule
+     */
+    public void cancelAlarm() {
+        Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+        final PendingIntent pIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        alarm.cancel(pIntent);
+//2c37dfa97f1168e610a2751b9455fa7527c583b4
     }
 }
+
+
