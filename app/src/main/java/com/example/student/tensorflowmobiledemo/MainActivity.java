@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             String blue = "";
             if (mBluetoothAdapter == null) {
-                // Device does not support Bluetooth
+                blue.concat("bluetooth isn't supported");
             } else {
                 if (!mBluetoothAdapter.isEnabled()) {
                      blue.concat("bluetooth isn't enable");
