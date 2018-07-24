@@ -3,6 +3,7 @@ package com.example.student.tensorflowmobiledemo;
 //HEAD
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -23,6 +24,7 @@ import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
 public class MainActivity extends AppCompatActivity {
 
+
     private TextView battery;
     private BroadcastReceiver aBatInfoReceiver = new BroadcastReceiver() {
         @Override
@@ -33,13 +35,53 @@ public class MainActivity extends AppCompatActivity {
             int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
             boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
             boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
-            String networkInfo = intent.getStringExtra(WifiManager.EXTRA_NETWORK_INFO);
-
-            battery.setText(String.valueOf(level)+"%"+" IsCharging = "+String.valueOf(isCharging)+" USBCharging = "+String.valueOf(usbCharge)+" ACCharging = "+String.valueOf(acCharge)+" " +networkInfo
-            );
+            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            String blue = "";
+            if (mBluetoothAdapter == null) {
+                // Device does not support Bluetooth
+            } else {
+                if (!mBluetoothAdapter.isEnabled()) {
+                     blue.concat("bluetooth isn't enable");
+                }
+                else{
+                     blue.concat("bluetooth is enable");
+                }
+            }
+            int wifistate = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,WifiManager.WIFI_STATE_UNKNOWN);
+            battery.setText(String.valueOf(level)+"%"+" IsCharging = "+String.valueOf(isCharging)+" USBCharging = "+String.valueOf(usbCharge)+" ACCharging = "+String.valueOf(acCharge)+""+blue);
         }
     };
+    public static int DetailedStateToNum(NetworkInfo.DetailedState state){
+        switch (state){
+            case AUTHENTICATING:
+                return 1;
+            case BLOCKED:
+                return 2;
+            case CAPTIVE_PORTAL_CHECK:
+                return 3;
+            case CONNECTED:
+                return 4;
+            case CONNECTING:
+                return 5;
+            case DISCONNECTED:
+                return 6;
+            case FAILED:
+                return 7;
+            case IDLE:
+                return 8;
+            case OBTAINING_IPADDR:
+                return 9;
+            case SCANNING:
+                return 10;
+            case SUSPENDED:
+                return 11;
+            case VERIFYING_POOR_LINK:
+                return 12;
+            default:
+                return -1;
 
+        }
+    }
 
     private static final String MODEL_FILE = "KerasModelSec2.pb";
     private static final String INPUT_NODE = "lstm_1_input";
