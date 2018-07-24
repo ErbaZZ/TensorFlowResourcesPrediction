@@ -30,4 +30,8 @@ public class TFPredictor {
         tfInterface.fetch(outputNode, result);
         return result;
     }
+
+    public static TensorFlowInferenceInterface getTFInterface() {
+        return tfInterface;
+    }
 }
