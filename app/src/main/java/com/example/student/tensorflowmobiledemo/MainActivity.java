@@ -18,8 +18,6 @@ import android.widget.TextView;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
-import android.net.NetworkInfo;
-import android.net.wifi.WifiManager;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
@@ -33,109 +31,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String OUTPUT_NODE = "output_node0";
     private float[] collectInfo ;
     private TextView battery;
-    private BroadcastReceiver InfoReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-            int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-            boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL;
-            int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-            boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
-            boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
-            boolean wirelessCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_WIRELESS;
-            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            String blue = "";
-            if (mBluetoothAdapter == null) {
-                blue.concat("bluetooth isn't supported");
-                Log.i("Bluetooth", "Not supported");
-            } else {
-                if (!mBluetoothAdapter.isEnabled()) {
-                     blue.concat("bluetooth isn't enable");
-                    Log.i("Bluetooth", "Not enabled");
-                }
-                else{
-                     blue.concat("bluetooth is enable");
-                    Log.i("Bluetooth", "Enabled");
-                }
-            }
-            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-            //int wifistate = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,WifiManager.WIFI_STATE_UNKNOWN);
-            NetworkInfo networkInfo2 = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-            NetworkInfo.DetailedState detailedState;
-            int wifi = -1;
-            if(networkInfo2!=null)
-            {
-                detailedState = networkInfo2.getDetailedState();
-                wifi = DetailedStateToNum(detailedState);
-            }
-            ConnectivityManager conn =  (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = null;
-            networkInfo = conn.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-            String connType;
-            int connState;
-            if (networkInfo == null){
-                // No cellular connectivity
-                connType = "NONE";
-                connState = -1;
-            } else {
-                connType = networkInfo.getSubtypeName();
-                connState = StateToNum(networkInfo.getState());
-            }
-            float rx = TrafficStats.getMobileRxBytes();
-            float tx =  TrafficStats.getMobileTxBytes();
-            float totalrx = TrafficStats.getTotalRxBytes();
-            float totaltx =  TrafficStats.getTotalTxBytes();
-            boolean inAirplaneMode = intent.getBooleanExtra("state", false);
-            battery.setText(String.valueOf(level)+"% WifiCharging = "+wirelessCharge+" IsCharging = "+String.valueOf(isCharging)+" USBCharging = "+String.valueOf(usbCharge)+" ACCharging = "+String.valueOf(acCharge)+" Bluetooth: "+state+" Network Type connected: "+connType+" Network State connected: "+connState+" Wifi Status: "+wifi+" AirplaneMode: "+inAirplaneMode
-            +" RX: "+rx+" TX: "+tx+" TotalRX: "+totalrx+" TotalTX: "+totaltx);
-        }
-    };
-    public static int StateToNum(NetworkInfo.State  state){
-        switch (state){
-            case CONNECTED:
-                return 4;
-            case CONNECTING:
-                return 5;
-            case DISCONNECTED:
-                return 6;
-            case SUSPENDED:
-                return 11;
-            default:
-                return -1;
+    private StatusRecorder statusRecorder;
 
-        }
-    }
-    public static int DetailedStateToNum(NetworkInfo.DetailedState state){
-        switch (state){
-            case AUTHENTICATING:
-                return 1;
-            case BLOCKED:
-                return 2;
-            case CAPTIVE_PORTAL_CHECK:
-                return 3;
-            case CONNECTED:
-                return 4;
-            case CONNECTING:
-                return 5;
-            case DISCONNECTED:
-                return 6;
-            case FAILED:
-                return 7;
-            case IDLE:
-                return 8;
-            case OBTAINING_IPADDR:
-                return 9;
-            case SCANNING:
-                return 10;
-            case SUSPENDED:
-                return 11;
-            case VERIFYING_POOR_LINK:
-                return 12;
-            default:
-                return -1;
-
-        }
-    }
 
 
     private Float[] predicted;
@@ -151,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         tvPredicted = findViewById(R.id.tvPredicted);
         tvCurrent = findViewById(R.id.tvCurrent);
         tvAccuracy = findViewById(R.id.tvAccuracy);
@@ -166,8 +64,6 @@ public class MainActivity extends AppCompatActivity {
         recordManager = new RecordManager(new ArrayList<Float>(Arrays.asList(predicted)), new ArrayList<Float>(Arrays.asList(actual)));
 
         this.visualize(recordManager.getPredicted(), recordManager.getActual());
-        battery = (TextView)this.findViewById(R.id.text1);
-        this.registerReceiver(this.InfoReceiver,new IntentFilter(Intent.ACTION_DEFAULT));
 
         this.initialize();
 //        Iterator<Operation> operations = tfPredictor.getTFInterface().graph().operations();
