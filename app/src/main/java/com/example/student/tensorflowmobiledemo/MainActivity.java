@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String MODEL_FILE = "KerasModelMin.pb";
     private static final String INPUT_NODE = "lstm_40_input_1";
     private static final String OUTPUT_NODE = "output_node0";
-
+    private float[] collectInfo ;
     private TextView battery;
     private BroadcastReceiver aBatInfoReceiver = new BroadcastReceiver() {
         @Override
