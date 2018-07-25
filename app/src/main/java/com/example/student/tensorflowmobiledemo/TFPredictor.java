@@ -15,9 +15,9 @@ public class TFPredictor {
     private AssetManager assets;
 
     public TFPredictor(String model, String input, String output, AssetManager assets) {
-        this.modelFile = model;
-        this.inputNode = input;
-        this.outputNode = output;
+        modelFile = model;
+        inputNode = input;
+        outputNode = output;
         this.assets = assets;
         tfInterface = new TensorFlowInferenceInterface(assets, modelFile);
     }

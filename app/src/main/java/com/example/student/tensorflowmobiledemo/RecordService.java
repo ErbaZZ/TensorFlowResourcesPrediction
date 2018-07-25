@@ -1,7 +1,9 @@
 package com.example.student.tensorflowmobiledemo;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
+import android.os.PowerManager;
 import android.util.Log;
 
 /**
@@ -15,6 +17,8 @@ public class RecordService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         // TODO: Add repeated tasks
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         Log.i("Service Status","Running");
+        Log.i("Screen Status",pm.isInteractive() + "");
     }
 }
