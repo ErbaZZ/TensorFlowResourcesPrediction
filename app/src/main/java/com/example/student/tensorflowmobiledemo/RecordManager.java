@@ -3,8 +3,8 @@ package com.example.student.tensorflowmobiledemo;
 import java.util.ArrayList;
 
 public class RecordManager {
-    private ArrayList<Float> predicted;
-    private ArrayList<Float> actual;
+    private static ArrayList<Float> predicted;
+    private static ArrayList<Float> actual;
 
     public RecordManager() {
         predicted = new ArrayList<Float>();
@@ -16,8 +16,9 @@ public class RecordManager {
         actual = a;
     }
 
-    public void record() {
-
+    public static void record(float p, float a) {
+        predicted.add(p);
+        actual.add(a);
     }
 
     public ArrayList<Float> getPredicted() {

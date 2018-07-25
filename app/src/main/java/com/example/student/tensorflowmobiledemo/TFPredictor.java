@@ -22,7 +22,7 @@ public class TFPredictor {
         tfInterface = new TensorFlowInferenceInterface(assets, modelFile);
     }
 
-    public float[] predict(float[] input, long[] inputDim) {
+    public static float[] predict(float[] input, long[] inputDim) {
         long[] inputDimension = inputDim;
         tfInterface.feed(inputNode, input, inputDimension);
         tfInterface.run(new String[] {outputNode});
