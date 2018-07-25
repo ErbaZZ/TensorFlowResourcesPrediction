@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private TextView battery;
-    private BroadcastReceiver aBatInfoReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver InfoReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL,0);
@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 // HEAD
         battery = (TextView)this.findViewById(R.id.text1);
-        this.registerReceiver(this.aBatInfoReceiver,new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        this.registerReceiver(this.InfoReceiver,new IntentFilter(Intent.ACTION_DEFAULT));
 
         this.initialize();
         float[] input = {
