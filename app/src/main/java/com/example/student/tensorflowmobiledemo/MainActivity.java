@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -20,9 +21,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String MODEL_FILE = "KerasModelMin.pb";
     private static final String INPUT_NODE = "lstm_40_input_1";
     private static final String OUTPUT_NODE = "output_node0";
-    private float[] collectInfo ;
-    private TextView battery;
-    private StatusRecorder statusRecorder;
 
     private TFPredictor tfPredictor;
     private RecordManager recordManager;
@@ -40,10 +38,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.initialize();
-        tvPredicted = findViewById(R.id.tvPredicted);
-        tvActual = findViewById(R.id.tvCurrent);
-        tvAccuracy = findViewById(R.id.tvAccuracy);
-        graph = findViewById(R.id.graph);
 
 //        Iterator<Operation> operations = tfPredictor.getTFInterface().graph().operations();
 //
@@ -51,22 +45,16 @@ public class MainActivity extends AppCompatActivity {
 //            Operation op = operations.next();
 //            Log.i("Operation", op.toString());
 //        }
-        /*float[] input = {
-                1400f / 1440f, 20f / 31f, 1f, 0f, 0f, 0f, 0f, 1f, 0.69f, 1f, 1f, 0f,
-                1401f / 1440f, 20f / 31f, 1f, 0f, 0f, 0f, 0f, 1f, 0.68f, 1f, 1f, 0f,
-                1402f / 1440f, 20f / 31f, 1f, 0f, 0f, 0f, 0f, 1f, 0.675f, 1f, 1f, 0f};
-        long[] inputDimension = {3, 12, 1};
-        float[] result = tfPredictor.predict(input, inputDimension);
-        for (float r : result) {
-            Log.i("Result", "" + r);
-        }*/
-
-        this.visualizeGraph(recordManager.getShiftedPredicted(), recordManager.getActual());
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         setAccuracyText(recordManager.calculateAccuracy());
+        updateText();
+        updateGraph(recordManager.getShiftedPredicted(), recordManager.getActual());
+    }
+
+    private void updateText() {
         float currentPredicted = recordManager.getPredictedElement(pointCounter);
         float currentActual = recordManager.getActualElement(pointCounter);
 
@@ -74,15 +62,17 @@ public class MainActivity extends AppCompatActivity {
         else if (Math.round(currentPredicted) == 0) tvPredicted.setText("OFF");
         if (currentActual == 1f) tvActual.setText("ON");
         else if (currentActual == 0f) tvActual.setText("OFF");
-
-        updateGraph(recordManager.getShiftedPredicted(), recordManager.getActual());
-
     }
 
     /**
      * Initialize the necessary variables
      */
     public void initialize() {
+        tvPredicted = findViewById(R.id.tvPredicted);
+        tvActual = findViewById(R.id.tvCurrent);
+        tvAccuracy = findViewById(R.id.tvAccuracy);
+        graph = findViewById(R.id.graph);
+
         tfPredictor = new TFPredictor(MODEL_FILE, INPUT_NODE, OUTPUT_NODE, getAssets());
         ArrayList<Float> predicted = new ArrayList<Float>();
         ArrayList<Float> actual = new ArrayList<Float>();
@@ -93,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         recordManager = new RecordManager(new ArrayList<float[]>(), predicted, actual);
         cancelAlarm();
         scheduleAlarm();
+        visualizeGraph(recordManager.getShiftedPredicted(), recordManager.getActual());
     }
 
     /**
@@ -101,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
     public void scheduleAlarm() {
         Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
         final PendingIntent pIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        long firstMillis = System.currentTimeMillis();
         AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
         int interval = 1000 * 60;   // 1 minute interval
         alarm.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), interval, pIntent);
@@ -126,16 +116,6 @@ public class MainActivity extends AppCompatActivity {
     private void visualizeGraph(ArrayList<Float> shiftedPredicted, ArrayList<Float> actual) {
         seriesPredicted = new LineGraphSeries<>();
         seriesActual = new LineGraphSeries<>();
-        /*for (int i = 0; i < actual.size(); i++) {
-            if (shiftedPredicted.get(i) != -1f) {
-                DataPoint dpp = new DataPoint(pointCounter, Math.round(shiftedPredicted.get(pointCounter)));
-                seriesPredicted.appendData(dpp, true, 100);
-            }
-
-            DataPoint dpa = new DataPoint(pointCounter, actual.get(pointCounter));
-            seriesActual.appendData(dpa, true, 100);
-            pointCounter++;
-        }*/
         updateGraph(shiftedPredicted, actual);
 
         seriesPredicted.setTitle("Predicted");
@@ -161,12 +141,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateGraph(ArrayList<Float> predicted, ArrayList<Float> actual) {
         for (int i = pointCounter; i < actual.size(); i++) {
+            Log.d("Graph", "Point Counter: " + pointCounter + " Predicted: " + predicted.get(i));
             if (predicted.get(i) != -1f) {
+                Log.d("Predicted added", predicted.get(i) + "");
                 DataPoint dpp = new DataPoint(pointCounter, Math.round(predicted.get(i)));
-                seriesPredicted.appendData(dpp, false, 100);
+                seriesPredicted.appendData(dpp, false, 50);
             }
             DataPoint dpa = new DataPoint(pointCounter, actual.get(i));
-            seriesPredicted.appendData(dpa, false, 100);
+            seriesActual.appendData(dpa, false, 50);
             pointCounter++;
         }
 
