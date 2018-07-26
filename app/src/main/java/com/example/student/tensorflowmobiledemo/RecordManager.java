@@ -67,6 +67,7 @@ public class RecordManager {
             if (Math.round(shifted.get(i)) == actual.get(i)) numCorrect++;
             numCompare++;
         }
+        if (numCompare == 0) return 1.0f;
         return numCorrect / (float)numCompare;
     }
 

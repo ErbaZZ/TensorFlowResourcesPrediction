@@ -149,6 +149,7 @@ public class StatusRecorder{
     }
 
     public float getWIFIStatus() {
+        updateWIFIStatus();
         return wifiIsEnabled ? 1f : 0f;
     }
 }

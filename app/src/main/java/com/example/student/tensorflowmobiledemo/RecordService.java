@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.PowerManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 /**
@@ -21,14 +22,22 @@ public class RecordService extends IntentService {
         Log.i("Service Status","Running");
         StatusRecorder statusRecorder = new StatusRecorder(this.getApplicationContext());
         statusRecorder.updateStatuses();
-        float predicted = TFPredictor.predict(statusRecorder.getCurrentStatuses())[0];
+        float[] statuses = statusRecorder.getCurrentStatuses();
+        float predicted = TFPredictor.predict(statuses)[0];
         float actual = statusRecorder.getWIFIStatus();
         Log.d("Result", "Predicted: " + predicted + ", Actual: " + actual);
         RecordManager.addResult(predicted, actual);
+        RecordManager.addRecord(statuses);
 
-        Intent i = new Intent(this, MainActivity.class);
+        /*Intent i = new Intent(this, MainActivity.class);
         i.setAction(Intent.ACTION_SEND);
         i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(i);
+        startActivity(i);*/
+        sendTrigger();
+    }
+
+    private void sendTrigger() {
+        Intent intent = new Intent("trigger");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 }

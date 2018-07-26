@@ -2,19 +2,26 @@ package com.example.student.tensorflowmobiledemo;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
-import android.os.SystemClock;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
+
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import org.tensorflow.Operation;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,21 +45,35 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.initialize();
-
-//        Iterator<Operation> operations = tfPredictor.getTFInterface().graph().operations();
-//
-//        while (operations.hasNext()) {
-//            Operation op = operations.next();
-//            Log.i("Operation", op.toString());
-//        }
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        setAccuracyText(recordManager.calculateAccuracy());
-        updateText();
-        updateGraph(recordManager.getShiftedPredicted(), recordManager.getActual());
+    public void onResume() {
+        super.onResume();
+        // This registers mMessageReceiver to receive messages.
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(mMessageReceiver,
+                        new IntentFilter("trigger"));
     }
+
+    @Override
+    protected void onPause() {
+        // Unregister since the activity is not visible
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(mMessageReceiver);
+        super.onPause();
+    }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            scheduleAlarm();
+            setAccuracyText(recordManager.calculateAccuracy());
+            updateText();
+            updateGraph(recordManager.getShiftedPredicted(), recordManager.getActual());
+        }
+    };
+
 
     private void updateText() {
         float currentPredicted = recordManager.getPredictedElement(pointCounter);
@@ -67,40 +88,53 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Initialize the necessary variables
      */
-    public void initialize() {
+    private void initialize() {
         tvPredicted = findViewById(R.id.tvPredicted);
         tvActual = findViewById(R.id.tvCurrent);
         tvAccuracy = findViewById(R.id.tvAccuracy);
         graph = findViewById(R.id.graph);
 
         tfPredictor = new TFPredictor(MODEL_FILE, INPUT_NODE, OUTPUT_NODE, getAssets());
-        ArrayList<Float> predicted = new ArrayList<Float>();
+        /*ArrayList<Float> predicted = new ArrayList<Float>();
         ArrayList<Float> actual = new ArrayList<Float>();
         for (int i = 0; i < 30; i++) {
             predicted.add(Float.valueOf(Math.round(Math.random())));
             actual.add(Float.valueOf(Math.round(Math.random())));
         }
-        recordManager = new RecordManager(new ArrayList<float[]>(), predicted, actual);
+        recordManager = new RecordManager(new ArrayList<float[]>(), predicted, actual);*/
+        recordManager = new RecordManager();
         cancelAlarm();
         scheduleAlarm();
+
+        StatusRecorder statusRecorder = new StatusRecorder(this);
+        statusRecorder.updateStatuses();
+        float[] statuses = statusRecorder.getCurrentStatuses();
+        float predicted = TFPredictor.predict(statuses)[0];
+        float actual = statusRecorder.getWIFIStatus();
+        Log.d("Result", "Predicted: " + predicted + ", Actual: " + actual);
+        recordManager.addResult(predicted, actual);
+        recordManager.addRecord(statuses);
+        updateText();
+
         visualizeGraph(recordManager.getShiftedPredicted(), recordManager.getActual());
     }
 
     /**
      * Start the schedule to run repeated tasks every interval period
      */
-    public void scheduleAlarm() {
+    private void scheduleAlarm() {
         Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
         final PendingIntent pIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
         int interval = 1000 * 60;   // 1 minute interval
-        alarm.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), interval, pIntent);
+        //alarm.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 1000, interval, pIntent);
+        alarm.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 60000, pIntent);
     }
 
     /**
      * Cancel the repeated tasks schedule
      */
-    public void cancelAlarm() {
+    private void cancelAlarm() {
         Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
         final PendingIntent pIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
@@ -111,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
      * Visualize the data points of the two ArrayLists as a graph
      *
      * @param shiftedPredicted ArrayList of the WIFI status predicted with the inference model shifted to match the actual time
-     * @param actual    ArrayList of the actual WIFI status
+     * @param actual           ArrayList of the actual WIFI status
      */
     private void visualizeGraph(ArrayList<Float> shiftedPredicted, ArrayList<Float> actual) {
         seriesPredicted = new LineGraphSeries<>();
@@ -123,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
         seriesActual.setTitle("Actual");
         seriesActual.setColor(Color.BLUE);
-        // set manual X bounds
+        // set manual bounds
         graph.getViewport().setYAxisBoundsManual(true);
         graph.getViewport().setMinY(0);
         graph.getViewport().setMaxY(1);
@@ -154,8 +188,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void setAccuracyText(float percentage) {
+    private void setAccuracyText(float percentage) {
         tvAccuracy.setText(percentage * 100 + "%");
+    }
+
+    private void printTFOperations() {
+        Iterator<Operation> operations = tfPredictor.getTFInterface().graph().operations();
+
+        while (operations.hasNext()) {
+            Operation op = operations.next();
+            Log.i("Operation", op.toString());
+        }
     }
 }
 
