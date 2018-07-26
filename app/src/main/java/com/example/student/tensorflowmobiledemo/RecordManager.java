@@ -1,22 +1,31 @@
 package com.example.student.tensorflowmobiledemo;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 public class RecordManager {
+    private static ArrayList<float[]> records;
     private static ArrayList<Float> predicted;
     private static ArrayList<Float> actual;
 
     public RecordManager() {
+        records = new ArrayList<float[]>();
         predicted = new ArrayList<Float>();
         actual = new ArrayList<Float>();
     }
 
-    public RecordManager(ArrayList<Float> p, ArrayList<Float> a) {
+    public RecordManager(ArrayList<float[]> r, ArrayList<Float> p, ArrayList<Float> a) {
+        records = r;
         predicted = p;
         actual = a;
     }
 
-    public static void record(float p, float a) {
+    public static void addRecord(float[] record) {
+        records.add(record);
+    }
+
+    public static void addResult(float p, float a) {
         predicted.add(p);
         actual.add(a);
     }
@@ -28,8 +37,9 @@ public class RecordManager {
     public ArrayList<Float> getShiftedPredicted(int shift) {
         ArrayList<Float> shiftedPredicted = (ArrayList<Float>)predicted.clone();
         for (int i = 0; i < shift; i++) {
-            shiftedPredicted.add(0, -1.0f);
+            shiftedPredicted.add(0, -1f);
         }
+        Log.d("ShiftedPredicted",shiftedPredicted.size() + "");
         return shiftedPredicted;
     }
 
@@ -37,7 +47,7 @@ public class RecordManager {
         int shift = 30;
         ArrayList<Float> shiftedPredicted = (ArrayList<Float>)predicted.clone();
         for (int i = 0; i < shift; i++) {
-            shiftedPredicted.add(0, -1.0f);
+            shiftedPredicted.add(0, -1f);
         }
         return shiftedPredicted;
     }
@@ -47,11 +57,24 @@ public class RecordManager {
     }
 
     public float calculateAccuracy() {
+        ArrayList<Float> shifted = getShiftedPredicted();
         int n = actual.size();
+        if (n == 0) return 1;
         int numCorrect = 0;
+        int numCompare = 0;
         for (int i = 0; i < n; i++) {
-            if (predicted.get(i + 30) == actual.get(i)) numCorrect++;
+            if (shifted.get(i) == -1f) continue;
+            if (Math.round(shifted.get(i)) == actual.get(i)) numCorrect++;
+            numCompare++;
         }
-        return numCorrect / (float)n;
+        return numCorrect / (float)numCompare;
+    }
+
+    public float getPredictedElement(int index) {
+        return getShiftedPredicted().get(index);
+    }
+
+    public float getActualElement(int index) {
+        return getActual().get(index);
     }
 }

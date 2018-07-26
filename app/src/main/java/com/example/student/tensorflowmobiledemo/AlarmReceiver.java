@@ -14,7 +14,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Intent i = new Intent(context, RecordService.class);
         // TODO: Add actual required extras
-        i.putExtra("foo", "bar");
+        // i.putExtra("foo", "bar");
         context.startService(i);
     }
 }

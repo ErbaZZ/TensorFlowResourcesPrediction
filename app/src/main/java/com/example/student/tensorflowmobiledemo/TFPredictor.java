@@ -12,6 +12,7 @@ public class TFPredictor {
     private static String inputNode;
     private static String outputNode;
     private static TensorFlowInferenceInterface tfInterface;
+    private static long[] defaultDimension = {1, 12, 1};
     private AssetManager assets;
 
     public TFPredictor(String model, String input, String output, AssetManager assets) {
@@ -24,6 +25,14 @@ public class TFPredictor {
 
     public static float[] predict(float[] input, long[] inputDim) {
         long[] inputDimension = inputDim;
+        tfInterface.feed(inputNode, input, inputDimension);
+        tfInterface.run(new String[] {outputNode});
+        float[] result = new float[(int)inputDimension[0]];
+        tfInterface.fetch(outputNode, result);
+        return result;
+    }
+    public static float[] predict(float[] input) {
+        long[] inputDimension = defaultDimension;
         tfInterface.feed(inputNode, input, inputDimension);
         tfInterface.run(new String[] {outputNode});
         float[] result = new float[(int)inputDimension[0]];
