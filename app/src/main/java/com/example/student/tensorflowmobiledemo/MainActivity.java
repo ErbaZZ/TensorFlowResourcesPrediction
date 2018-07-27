@@ -1,5 +1,6 @@
 package com.example.student.tensorflowmobiledemo;
-
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -9,6 +10,7 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -95,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
      * Initialize the necessary variables
      */
     private void initialize() {
+        notification();
         tvPredicted = findViewById(R.id.tvPredicted);
         tvActual = findViewById(R.id.tvCurrent);
         tvAccuracy = findViewById(R.id.tvAccuracy);
@@ -223,6 +226,15 @@ public class MainActivity extends AppCompatActivity {
             Operation op = operations.next();
             Log.i("Operation", op.toString());
         }
+    }
+    public void notification(){
+        NotificationCompat.Builder notification = (NotificationCompat.Builder) new NotificationCompat.Builder(this).setSmallIcon(R.mipmap.ic_launcher_round)
+                .setContentTitle("Keep Running")
+                .setContentText("Don't Doze");
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(1,notification.build());
+
+
     }
 
 }
