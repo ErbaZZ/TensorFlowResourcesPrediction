@@ -1,6 +1,7 @@
 package com.example.student.tensorflowmobiledemo;
 
 import android.app.IntentService;
+import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;

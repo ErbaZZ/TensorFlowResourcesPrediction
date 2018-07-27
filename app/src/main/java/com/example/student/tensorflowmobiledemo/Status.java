@@ -45,6 +45,36 @@ public class Status {
     @ColumnInfo(name = "Screen_Status")
     private float screenStatus;
 
+    public Status (float minute, float date, float dayOfWeek, float isCharging, float chgUSB, float chgWireless, float chgAC, float wifiStatus, float percentage, float bluetoothStatus, float cellularStatus, float screenStatus) {
+        this.minute = minute;
+        this.date = date;
+        this.dayOfWeek = dayOfWeek;
+        this.isCharging = isCharging;
+        this.chgUSB = chgUSB;
+        this.chgWireless = chgWireless;
+        this.chgAC = chgAC;
+        this.wifiStatus = wifiStatus;
+        this.percentage = percentage;
+        this.bluetoothStatus = bluetoothStatus;
+        this.cellularStatus = cellularStatus;
+        this.screenStatus = screenStatus;
+    }
+
+    public Status (float[] status) {
+        this.minute = status[0];
+        this.date = status[1];
+        this.dayOfWeek = status[2];
+        this.isCharging = status[3];
+        this.chgUSB = status[4];
+        this.chgWireless = status[5];
+        this.chgAC = status[6];
+        this.wifiStatus = status[7];
+        this.percentage = status[8];
+        this.bluetoothStatus = status[9];
+        this.cellularStatus = status[10];
+        this.screenStatus = status[11];
+    }
+
     public float getMinute() {
         return minute;
     }

@@ -2,6 +2,8 @@ package com.example.student.tensorflowmobiledemo;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.arch.persistence.room.Room;
+import android.arch.persistence.room.RoomDatabase;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
     private LineGraphSeries<DataPoint> seriesPredicted;
     private LineGraphSeries<DataPoint> seriesActual;
 
+    private AppDatabase db;
+    private StatusDao statusDao;
+
     private int pointCounter = 0;
 
     @Override
@@ -49,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
         // Register the trigger receiver to get the trigger from background service
         LocalBroadcastManager.getInstance(this)
@@ -59,11 +64,19 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+        super.onPause();
         // Unregister the trigger as the Activity is not visible
         LocalBroadcastManager.getInstance(this)
                 .unregisterReceiver(triggerReceiver);
         super.onPause();
     }
+
+    @Override
+    protected  void onDestroy() {
+        super.onDestroy();
+
+    }
+
 
     /**
      * Receives trigger from the background service to update the information on the screen and reschedule the AlarmReceiver
@@ -75,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
             setAccuracyText(recordManager.calculateAccuracy());
             updateText();
             updateGraph(recordManager.getShiftedPredicted(), recordManager.getActual());
+            Log.d("DB size", statusDao.getAll().size() + "");
         }
     };
 
@@ -103,6 +117,9 @@ public class MainActivity extends AppCompatActivity {
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);               // Prevent the screen from turning off
 
+        db = Room.databaseBuilder(this, AppDatabase.class, "status-record").build();
+        statusDao = db.statusDao();
+
         // Add dummy values
         ArrayList<Float> predicted = new ArrayList<Float>();
         ArrayList<Float> actual = new ArrayList<Float>();
@@ -123,8 +140,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Result", "Predicted: " + firstPredicted + ", Actual: " + firstActual);
         recordManager.addResult(firstPredicted, firstActual);
         recordManager.addRecord(statuses);
-
         updateText();
+        setAccuracyText(recordManager.calculateAccuracy());
         visualizeGraph(recordManager.getShiftedPredicted(), recordManager.getActual());
     }
 
