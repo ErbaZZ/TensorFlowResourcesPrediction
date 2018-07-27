@@ -230,7 +230,9 @@ public class MainActivity extends AppCompatActivity {
     public void notification(){
         NotificationCompat.Builder notification = (NotificationCompat.Builder) new NotificationCompat.Builder(this).setSmallIcon(R.mipmap.ic_launcher_round)
                 .setContentTitle("Keep Running")
-                .setContentText("Don't Doze");
+                .setContentText("Don't Doze")
+                .setWhen(System.currentTimeMillis())
+                .setOngoing(true);
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1,notification.build());
 
