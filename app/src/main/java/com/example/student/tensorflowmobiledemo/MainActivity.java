@@ -1,5 +1,5 @@
 package com.example.student.tensorflowmobiledemo;
-import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
@@ -50,22 +51,6 @@ public class MainActivity extends AppCompatActivity {
         this.initialize();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Register the trigger receiver to get the trigger from background service
-        LocalBroadcastManager.getInstance(this)
-                .registerReceiver(triggerReceiver,
-                        new IntentFilter("trigger"));
-    }
-
-    @Override
-    protected void onPause() {
-        // Unregister the trigger as the Activity is not visible
-        LocalBroadcastManager.getInstance(this)
-                .unregisterReceiver(triggerReceiver);
-        super.onPause();
-    }
 
     /**
      * Receives trigger from the background service to update the information on the screen and reschedule the AlarmReceiver
@@ -97,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
      * Initialize the necessary variables
      */
     private void initialize() {
-        notification();
+        setNotification();
         tvPredicted = findViewById(R.id.tvPredicted);
         tvActual = findViewById(R.id.tvCurrent);
         tvAccuracy = findViewById(R.id.tvAccuracy);
@@ -106,12 +91,17 @@ public class MainActivity extends AppCompatActivity {
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);               // Prevent the screen from turning off
 
+        // Register the trigger receiver to get the trigger from background service
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(triggerReceiver,
+                        new IntentFilter("trigger"));
+
         // Add dummy values
         ArrayList<Float> predicted = new ArrayList<Float>();
         ArrayList<Float> actual = new ArrayList<Float>();
         for (int i = 0; i < 50; i++) {
-            predicted.add(Float.valueOf(Math.round(Math.random())));
-            actual.add(Float.valueOf(Math.round(Math.random())));
+            predicted.add((float) Math.round(Math.random()));
+            actual.add((float) Math.round(Math.random()));
         }
         recordManager = new RecordManager(new ArrayList<float[]>(), predicted, actual);
         cancelAlarm();
@@ -227,8 +217,22 @@ public class MainActivity extends AppCompatActivity {
             Log.i("Operation", op.toString());
         }
     }
-    public void notification(){
-        NotificationCompat.Builder notification = (NotificationCompat.Builder) new NotificationCompat.Builder(this).setSmallIcon(R.mipmap.ic_launcher_round)
+    public void setNotification(){
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "StatusRecorder";
+            String description = "Record current device status";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("StatusRecorder", name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other setNotification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+        NotificationCompat.Builder notification = new NotificationCompat.Builder(this, "StatusRecorder")
+                .setSmallIcon(R.mipmap.ic_launcher_round)
                 .setContentTitle("Keep Running")
                 .setContentText("Don't Doze")
                 .setWhen(System.currentTimeMillis())

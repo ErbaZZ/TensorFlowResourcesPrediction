@@ -72,10 +72,14 @@ public class RecordManager {
     }
 
     public float getPredictedElement(int index) {
-        return getShiftedPredicted().get(index);
+        ArrayList<Float> sp = getShiftedPredicted();
+        if (index >= sp.size()) index = sp.size() - 1;
+        return sp.get(index);
     }
 
     public float getActualElement(int index) {
-        return getActual().get(index);
+        ArrayList<Float> ac = getActual();
+        if (index >= ac.size()) index = ac.size() - 1;
+        return ac.get(index);
     }
 }
