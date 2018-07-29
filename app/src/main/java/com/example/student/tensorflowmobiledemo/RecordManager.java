@@ -5,24 +5,24 @@ import android.util.Log;
 import java.util.ArrayList;
 
 public class RecordManager {
-    private static ArrayList<float[]> records;
+    private static ArrayList<float[]> statuses;
     private static ArrayList<Float> predicted;
     private static ArrayList<Float> actual;
 
     public RecordManager() {
-        records = new ArrayList<float[]>();
+        statuses = new ArrayList<float[]>();
         predicted = new ArrayList<Float>();
         actual = new ArrayList<Float>();
     }
 
     public RecordManager(ArrayList<float[]> r, ArrayList<Float> p, ArrayList<Float> a) {
-        records = r;
+        statuses = r;
         predicted = p;
         actual = a;
     }
 
     public static void addRecord(float[] record) {
-        records.add(record);
+        statuses.add(record);
     }
 
     public static void addResult(float p, float a) {
@@ -77,5 +77,9 @@ public class RecordManager {
 
     public float getActualElement(int index) {
         return getActual().get(index);
+    }
+
+    public static ArrayList<float[]> getStatuses() {
+        return statuses;
     }
 }

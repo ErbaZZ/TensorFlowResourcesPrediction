@@ -8,13 +8,13 @@ import android.arch.persistence.room.Query;
 import java.util.List;
 
 @Dao
-public interface StatusDao {
-    @Query("SELECT * FROM Status")
-    List<Status> getAll();
+public interface RecordDao {
+    @Query("SELECT * FROM Record")
+    List<Record> getAll();
 
     @Insert
-    void insertAll(Status... statuses);
+    void insertAll(Record... records);
 
     @Delete
-    void delete(Status status);
+    void delete(Record record);
 }

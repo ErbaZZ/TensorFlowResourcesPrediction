@@ -3,7 +3,6 @@ package com.example.student.tensorflowmobiledemo;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.arch.persistence.room.Room;
-import android.arch.persistence.room.RoomDatabase;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,8 +22,10 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 
 import org.tensorflow.Operation;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,8 +44,11 @@ public class MainActivity extends AppCompatActivity {
 
     private AppDatabase db;
     private StatusDao statusDao;
+    private RecordDao recordDao;
 
     private int pointCounter = 0;
+    private int importStatusSize;
+    private int importRecordSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,9 +76,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected  void onDestroy() {
-        super.onDestroy();
-
+    protected  void onStop() {
+        super.onStop();
+        //saveDatabase();
     }
 
 
@@ -116,20 +120,9 @@ public class MainActivity extends AppCompatActivity {
         tfPredictor = new TFPredictor(MODEL_FILE, INPUT_NODE, OUTPUT_NODE, getAssets());
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);               // Prevent the screen from turning off
-
-        db = Room.databaseBuilder(this, AppDatabase.class, "status-record").build();
-        statusDao = db.statusDao();
-
-        // Add dummy values
-        ArrayList<Float> predicted = new ArrayList<Float>();
-        ArrayList<Float> actual = new ArrayList<Float>();
-        for (int i = 0; i < 50; i++) {
-            predicted.add(Float.valueOf(Math.round(Math.random())));
-            actual.add(Float.valueOf(Math.round(Math.random())));
-        }
-        recordManager = new RecordManager(new ArrayList<float[]>(), predicted, actual);
         cancelAlarm();
         scheduleAlarm();
+        //loadDatabase();
 
         // Get the values for the first time
         StatusRecorder statusRecorder = new StatusRecorder(this.getApplicationContext());
@@ -143,6 +136,57 @@ public class MainActivity extends AppCompatActivity {
         updateText();
         setAccuracyText(recordManager.calculateAccuracy());
         visualizeGraph(recordManager.getShiftedPredicted(), recordManager.getActual());
+    }
+
+    private void loadDatabase() {
+        // Fetch past data from Room database
+        db = Room.databaseBuilder(this, AppDatabase.class, "status-record").allowMainThreadQueries().build();
+
+        statusDao = db.statusDao();
+        recordDao = db.recordDao();
+
+        List<Record> pastRecordList = recordDao.getAll();
+        List<Status> pastStatusList = statusDao.getAll();
+        importStatusSize = pastStatusList.size();
+        importRecordSize = pastRecordList.size();
+
+        ArrayList<Float> pastPredicted = new ArrayList<Float>();
+        ArrayList<Float> pastActual = new ArrayList<Float>();
+        for (Record r : pastRecordList) {
+            pastPredicted.add(r.getPredicted());
+            pastActual.add(r.getActual());
+        }
+
+        ArrayList<float[]> pastStatuses = new ArrayList<float[]>();
+        for (Status s : pastStatusList) {
+            pastStatuses.add(s.toFloatArray());
+        }
+
+        recordManager = new RecordManager(pastStatuses, pastPredicted, pastActual);
+
+    }
+
+    private void saveDatabase() {
+        ArrayList<Float> predicted = recordManager.getPredicted();
+        ArrayList<Float> actual = recordManager.getActual();
+        ArrayList<float[]> statuses = recordManager.getStatuses();
+
+        ArrayList<Record> savedRecords = new ArrayList<Record>();
+        ArrayList<Status> savedStatuses = new ArrayList<Status>();
+
+        for (int i = importRecordSize; i < actual.size(); i++) {
+            savedRecords.add(new Record(predicted.get(i), actual.get(i)));
+        }
+
+        for (int i = importStatusSize; i < statuses.size(); i++) {
+            savedStatuses.add(new Status(statuses.get(i)));
+        }
+
+        Record[] recordArray = (Record[]) savedRecords.toArray();
+        Status[] statusArray = (Status[]) savedStatuses.toArray();
+
+        recordDao.insertAll(recordArray);
+        statusDao.insertAll(statusArray);
     }
 
     /**

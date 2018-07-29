@@ -45,7 +45,7 @@ public class Status {
     @ColumnInfo(name = "Screen_Status")
     private float screenStatus;
 
-    public Status (float minute, float date, float dayOfWeek, float isCharging, float chgUSB, float chgWireless, float chgAC, float wifiStatus, float percentage, float bluetoothStatus, float cellularStatus, float screenStatus) {
+    public Status(float minute, float date, float dayOfWeek, float isCharging, float chgUSB, float chgWireless, float chgAC, float wifiStatus, float percentage, float bluetoothStatus, float cellularStatus, float screenStatus) {
         this.minute = minute;
         this.date = date;
         this.dayOfWeek = dayOfWeek;
@@ -60,7 +60,7 @@ public class Status {
         this.screenStatus = screenStatus;
     }
 
-    public Status (float[] status) {
+    public Status(float[] status) {
         this.minute = status[0];
         this.date = status[1];
         this.dayOfWeek = status[2];
@@ -177,5 +177,10 @@ public class Status {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public float[] toFloatArray() {
+        float[] floatArray = {minute, date, dayOfWeek, isCharging, chgUSB, chgWireless, chgAC, wifiStatus, percentage, bluetoothStatus, cellularStatus, screenStatus};
+        return floatArray;
     }
 }
