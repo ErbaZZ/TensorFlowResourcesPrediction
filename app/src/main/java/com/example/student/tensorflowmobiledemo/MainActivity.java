@@ -66,24 +66,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        // Register the trigger receiver to get the trigger from background service
-        LocalBroadcastManager.getInstance(this)
-                .registerReceiver(triggerReceiver,
-                        new IntentFilter("trigger"));
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        // Unregister the trigger as the Activity is not visible
-        LocalBroadcastManager.getInstance(this)
-                .unregisterReceiver(triggerReceiver);
-        super.onPause();
-    }
-
-    @Override
     protected  void onStop() {
         super.onStop();
         //saveDatabase();
@@ -154,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
         loadDatabase();
 
         // Get the values for the first time
-        StatusRecorder statusRecorder = new StatusRecorder(this.getApplicationContext());
+        statusRecorder = new StatusRecorder(this.getApplicationContext());
         statusRecorder.updateStatuses();
         float[] statuses = statusRecorder.getCurrentStatuses();
         float firstPredicted = TFPredictor.predict(statuses)[0];
@@ -338,8 +320,8 @@ public class MainActivity extends AppCompatActivity {
         }
         NotificationCompat.Builder notification = new NotificationCompat.Builder(this, "StatusRecorder")
                 .setSmallIcon(R.mipmap.ic_launcher_round)
-                .setContentTitle("Keep Running")
-                .setContentText("Don't Doze")
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText("Collecting statuses")
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true);
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
