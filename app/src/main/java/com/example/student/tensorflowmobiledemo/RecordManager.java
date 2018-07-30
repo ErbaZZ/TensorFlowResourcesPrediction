@@ -71,6 +71,32 @@ public class RecordManager {
         return numCorrect / (float)numCompare;
     }
 
+    /**
+     * Compare the actual and predicted array to get confusion matrix
+     * @return Each value in the confusion matrix in the order: TP, TN, FP, FM
+     */
+    public int[] calculateConfusionMatrix() {
+        ArrayList<Float> shifted = getShiftedPredicted();
+        int n = actual.size();
+        if (n == 0) return new int[] {0, 0, 0, 0};
+        int tp = 0, tn = 0, fp = 0, fn = 0;
+        for (int i = 0; i < n; i++) {
+            if (shifted.get(i) == -1f) continue;
+            int temp = Math.round(shifted.get(i));
+            if (temp == 1) {
+                if (actual.get(i) == 1) tp++;
+                else fp++;
+            }
+            else if (temp == 0) {
+                if (actual.get(i) == 1) fn++;
+                else tn++;
+            }
+        }
+
+        int[] result = {tp, tn, fp, fn};
+        return result;
+    }
+
     public float getPredictedElement(int index) {
         ArrayList<Float> sp = getShiftedPredicted();
         if (index >= sp.size()) index = sp.size() - 1;

@@ -38,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvPredicted;
     private TextView tvActual;
     private TextView tvAccuracy;
+    private TextView tvTP;
+    private TextView tvTN;
+    private TextView tvFP;
+    private TextView tvFN;
     private GraphView graph;
     private LineGraphSeries<DataPoint> seriesPredicted;
     private LineGraphSeries<DataPoint> seriesActual;
@@ -76,6 +80,12 @@ public class MainActivity extends AppCompatActivity {
         else if (Math.round(currentPredicted) == 0) tvPredicted.setText("OFF");
         if (currentActual == 1f) tvActual.setText("ON");
         else if (currentActual == 0f) tvActual.setText("OFF");
+
+        int[] confusion = recordManager.calculateConfusionMatrix();
+        tvTP.setText(confusion[0]+"");
+        tvTN.setText(confusion[1]+"");
+        tvFP.setText(confusion[2]+"");
+        tvFN.setText(confusion[3]+"");
     }
 
     /**
@@ -87,6 +97,10 @@ public class MainActivity extends AppCompatActivity {
         tvActual = findViewById(R.id.tvCurrent);
         tvAccuracy = findViewById(R.id.tvAccuracy);
         graph = findViewById(R.id.graph);
+        tvTP = findViewById(R.id.tvTruePositive);
+        tvTN = findViewById(R.id.tvTrueNegative);
+        tvFP = findViewById(R.id.tvFalsePositive);
+        tvFN = findViewById(R.id.tvFalseNegative);
         tfPredictor = new TFPredictor(MODEL_FILE, INPUT_NODE, OUTPUT_NODE, getAssets());
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);               // Prevent the screen from turning off
