@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TFPredictor tfPredictor;
     private RecordManager recordManager;
+    private StatusRecorder statusRecorder;
     private TextView tvPredicted;
     private TextView tvActual;
     private TextView tvAccuracy;
@@ -92,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
             setAccuracyText(recordManager.calculateAccuracy());
             updateText();
             updateGraph(recordManager.getShiftedPredicted(), recordManager.getActual());
+            addToDatabase(statusRecorder.getCurrentStatuses(), recordManager.getPredictedElement(pointCounter), recordManager.getActualElement(pointCounter));
             Log.d("DB size", statusDao.getAll().size() + "");
         }
     };
@@ -118,11 +120,12 @@ public class MainActivity extends AppCompatActivity {
         tvAccuracy = findViewById(R.id.tvAccuracy);
         graph = findViewById(R.id.graph);
         tfPredictor = new TFPredictor(MODEL_FILE, INPUT_NODE, OUTPUT_NODE, getAssets());
+        statusRecorder = new StatusRecorder(this);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);               // Prevent the screen from turning off
         cancelAlarm();
         scheduleAlarm();
-        //loadDatabase();
+        loadDatabase();
 
         // Get the values for the first time
         StatusRecorder statusRecorder = new StatusRecorder(this.getApplicationContext());
@@ -187,6 +190,14 @@ public class MainActivity extends AppCompatActivity {
 
         recordDao.insertAll(recordArray);
         statusDao.insertAll(statusArray);
+    }
+
+    private void addToDatabase(float[] s, float p, float a) {
+        Record record = new Record(p, a);
+        Status status = new Status(s);
+
+        recordDao.insertAll(record);
+        statusDao.insertAll(status);
     }
 
     /**

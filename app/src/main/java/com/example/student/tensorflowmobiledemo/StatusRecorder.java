@@ -148,6 +148,12 @@ public class StatusRecorder{
         return  statuses;
     }
 
+    public float[] getCurrentStatuses(boolean update) {
+        if (update == true) updateStatuses();
+        float[] statuses = {timeNormMinute, timeNormDate, timeNormDayOfWeek, batteryIsCharging ? 1f : 0f, batteryIsUSBCharging ? 1f : 0f, batteryIsWirelessCharging ? 1f : 0f, batteryIsACCharging ? 1f : 0f, wifiIsEnabled ? 1f : 0f, batteryLevel, bluetoothIsEnabled ? 1f : 0f, cellularIsEnabled ? 1f : 0f, screenIsEnabled ? 1f : 0f};
+        return  statuses;
+    }
+
     public float getWIFIStatus() {
         updateWIFIStatus();
         return wifiIsEnabled ? 1f : 0f;
