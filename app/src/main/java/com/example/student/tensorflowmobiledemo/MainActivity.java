@@ -29,8 +29,8 @@ import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String MODEL_FILE = "KerasModelMin.pb";
-    private static final String INPUT_NODE = "lstm_40_input_1";
+    private static final String MODEL_FILE = "GooglePixel.pb";
+    private static final String INPUT_NODE = "lstm_1_input_1";
     private static final String OUTPUT_NODE = "output_node0";
 
     private TFPredictor tfPredictor;
@@ -101,7 +101,9 @@ public class MainActivity extends AppCompatActivity {
         tvTN = findViewById(R.id.tvTrueNegative);
         tvFP = findViewById(R.id.tvFalsePositive);
         tvFN = findViewById(R.id.tvFalseNegative);
+
         tfPredictor = new TFPredictor(MODEL_FILE, INPUT_NODE, OUTPUT_NODE, getAssets());
+        printTFOperations();
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);               // Prevent the screen from turning off
 
@@ -111,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                         new IntentFilter("trigger"));
 
         // Add dummy values
-        ArrayList<Float> predicted = new ArrayList<Float>();
+        /*ArrayList<Float> predicted = new ArrayList<Float>();
         ArrayList<Float> actual = new ArrayList<Float>();
         for (int i = 0; i < 50; i++) {
             predicted.add((float) Math.round(Math.random()));
@@ -119,7 +121,9 @@ public class MainActivity extends AppCompatActivity {
         }
         recordManager = new RecordManager(new ArrayList<float[]>(), predicted, actual);
         cancelAlarm();
-        scheduleAlarm();
+        scheduleAlarm();*/
+
+        recordManager = new RecordManager();
 
         // Get the values for the first time
         StatusRecorder statusRecorder = new StatusRecorder(this.getApplicationContext());
