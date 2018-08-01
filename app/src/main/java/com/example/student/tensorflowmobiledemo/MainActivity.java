@@ -26,6 +26,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import org.tensorflow.Operation;
 
 import java.lang.reflect.Array;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String MODEL_FILE = "GooglePixel.pb";
     private static final String INPUT_NODE = "lstm_1_input_1";
     private static final String OUTPUT_NODE = "output_node0";
+    private static final DecimalFormat df = new DecimalFormat("#.###");
 
     private TFPredictor tfPredictor;
     private RecordManager recordManager;
@@ -100,10 +102,11 @@ public class MainActivity extends AppCompatActivity {
         else if (currentActual == 0f) tvActual.setText("OFF");
 
         int[] confusion = recordManager.calculateConfusionMatrix();
-        tvTP.setText(confusion[0]+"");
-        tvTN.setText(confusion[1]+"");
-        tvFP.setText(confusion[2]+"");
-        tvFN.setText(confusion[3]+"");
+        float n = confusion[0] + confusion[1] +confusion[2] +confusion[3];
+        tvTP.setText(confusion[0] + "\n" + df.format(confusion[0] / n * 100) + "%");
+        tvTN.setText(confusion[1] + "\n" + df.format(confusion[1] / n * 100) + "%");
+        tvFP.setText(confusion[2] + "\n" + df.format(confusion[2] / n * 100) + "%");
+        tvFN.setText(confusion[3] + "\n" + df.format(confusion[3] / n * 100) + "%");
     }
 
     /**
@@ -290,7 +293,7 @@ public class MainActivity extends AppCompatActivity {
      * @param percentage Percentage of the prediction accuracy
      */
     private void setAccuracyText(float percentage) {
-        tvAccuracy.setText(percentage * 100 + "%");
+        tvAccuracy.setText(df.format(percentage * 100) + "%");
     }
 
     /**

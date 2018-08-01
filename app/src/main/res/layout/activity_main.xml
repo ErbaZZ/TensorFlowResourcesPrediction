@@ -107,27 +107,30 @@
         android:layout_marginTop="24dp"
         android:text="Prediction"
         app:layout_constraintEnd_toStartOf="@+id/tvFalseNegative"
+        app:layout_constraintHorizontal_bias="0.562"
         app:layout_constraintStart_toEndOf="@+id/tvTruePositive"
         app:layout_constraintTop_toBottomOf="@+id/labelAccuracy" />
 
     <TextView
         android:id="@+id/tvTruePositive"
-        android:layout_width="wrap_content"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="32dp"
         android:text="TP"
+        android:textAlignment="center"
         app:layout_constraintStart_toEndOf="@+id/labelActual"
         app:layout_constraintTop_toBottomOf="@+id/labelPrediction" />
 
     <TextView
         android:id="@+id/tvFalsePositive"
-        android:layout_width="wrap_content"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="48dp"
         android:layout_marginTop="8dp"
         android:text="FP"
+        android:textAlignment="center"
         app:layout_constraintBottom_toTopOf="@+id/graph"
         app:layout_constraintStart_toEndOf="@+id/labelActual"
         app:layout_constraintTop_toBottomOf="@+id/tvTruePositive"
@@ -135,28 +138,85 @@
 
     <TextView
         android:id="@+id/tvFalseNegative"
-        android:layout_width="wrap_content"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="32dp"
         android:text="FN"
+        android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.355"
         app:layout_constraintStart_toEndOf="@+id/tvTruePositive"
         app:layout_constraintTop_toBottomOf="@+id/labelPrediction" />
 
     <TextView
         android:id="@+id/tvTrueNegative"
-        android:layout_width="wrap_content"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="TN"
+        android:textAlignment="center"
         app:layout_constraintBottom_toTopOf="@+id/graph"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.352"
         app:layout_constraintStart_toEndOf="@+id/tvFalsePositive"
-        app:layout_constraintTop_toBottomOf="@+id/tvFalseNegative" />
+        app:layout_constraintTop_toBottomOf="@+id/tvFalseNegative"
+        app:layout_constraintVertical_bias="0.533" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="F"
+        app:layout_constraintBottom_toBottomOf="@+id/tvFalsePositive"
+        app:layout_constraintEnd_toStartOf="@+id/tvFalsePositive"
+        app:layout_constraintStart_toEndOf="@+id/labelActual"
+        app:layout_constraintTop_toTopOf="@+id/tvFalsePositive" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="F"
+        app:layout_constraintBottom_toTopOf="@+id/tvFalseNegative"
+        app:layout_constraintEnd_toEndOf="@+id/tvFalseNegative"
+        app:layout_constraintStart_toStartOf="@+id/tvFalseNegative"
+        app:layout_constraintTop_toBottomOf="@+id/labelPrediction" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="T"
+        app:layout_constraintBottom_toBottomOf="@+id/tvTruePositive"
+        app:layout_constraintEnd_toStartOf="@+id/tvTruePositive"
+        app:layout_constraintStart_toEndOf="@+id/labelActual"
+        app:layout_constraintTop_toTopOf="@+id/tvTruePositive" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="T"
+        app:layout_constraintBottom_toTopOf="@+id/tvTruePositive"
+        app:layout_constraintEnd_toEndOf="@+id/tvTruePositive"
+        app:layout_constraintStart_toStartOf="@+id/tvTruePositive"
+        app:layout_constraintTop_toBottomOf="@+id/labelPrediction" />
 
 </android.support.constraint.ConstraintLayout>
