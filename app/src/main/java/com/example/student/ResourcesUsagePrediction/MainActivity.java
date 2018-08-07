@@ -1,4 +1,4 @@
-package com.example.student.tensorflowmobiledemo;
+package com.example.student.ResourcesUsagePrediction;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.AlarmManager;
@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Initialize the necessary variables
+     * Initialize the necessary variables and operations
      */
     private void initialize() {
         setNotification();
@@ -132,8 +132,6 @@ public class MainActivity extends AppCompatActivity {
                 .registerReceiver(triggerReceiver,
                         new IntentFilter("trigger"));
 
-
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);               // Prevent the screen from turning off
         cancelAlarm();
         scheduleAlarm();
         loadDatabase();
@@ -152,8 +150,10 @@ public class MainActivity extends AppCompatActivity {
         visualizeGraph(recordManager.getShiftedPredicted(), recordManager.getActual());
     }
 
+    /**
+     * Fetch the data from the Room database and initialize the RecordManager with those data
+     */
     private void loadDatabase() {
-        // Fetch past data from Room database
         db = Room.databaseBuilder(this, AppDatabase.class, "status-record").allowMainThreadQueries().build();
 
         statusDao = db.statusDao();
@@ -180,6 +180,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Add all records to the database
+     */
     private void saveDatabase() {
         ArrayList<Float> predicted = recordManager.getPredicted();
         ArrayList<Float> actual = recordManager.getActual();
@@ -203,6 +206,12 @@ public class MainActivity extends AppCompatActivity {
         statusDao.insertAll(statusArray);
     }
 
+    /**
+     * Add a record of one timestep to the database
+     * @param s statuses of the phone
+     * @param p prediction of the WIFI status 30 minutes in the future
+     * @param a current WIFI status
+     */
     private void addToDatabase(float[] s, float p, float a) {
         Record record = new Record(p, a);
         Status status = new Status(s);
@@ -270,15 +279,15 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Add new data points from the ArrayLists to the series in the graph
-     * @param predicted ArrayList of the predicted WIFI status values (Shifted to the same time with actual)
-     * @param actual ArrayList of the actual WIFI status values
+     * @param shiftedPredicted ArrayList of the predicted WIFI status values (Shifted to the same time with actual)
+     * @param actual           ArrayList of the actual WIFI status values
      */
-    private void updateGraph(ArrayList<Float> predicted, ArrayList<Float> actual) {
+    private void updateGraph(ArrayList<Float> shiftedPredicted, ArrayList<Float> actual) {
         for (int i = pointCounter; i < actual.size(); i++) {
-            Log.d("Graph", "Point Counter: " + pointCounter + " Predicted: " + predicted.get(i));
-            if (predicted.get(i) != -1f) {
-                Log.d("Predicted added", predicted.get(i) + "");
-                DataPoint dpp = new DataPoint(pointCounter, Math.round(predicted.get(i)));
+            Log.d("Graph", "Point Counter: " + pointCounter + " Predicted: " + shiftedPredicted.get(i));
+            if (shiftedPredicted.get(i) != -1f) {
+                Log.d("Predicted added", shiftedPredicted.get(i) + "");
+                DataPoint dpp = new DataPoint(pointCounter, Math.round(shiftedPredicted.get(i)));
                 seriesPredicted.appendData(dpp, true, pointCounter + 5);
             }
             DataPoint dpa = new DataPoint(pointCounter, actual.get(i));
@@ -307,6 +316,10 @@ public class MainActivity extends AppCompatActivity {
             Log.i("Operation", op.toString());
         }
     }
+
+    /**
+     * Add persistence notification to prevent dozing
+     */
     public void setNotification(){
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library

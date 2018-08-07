@@ -1,4 +1,4 @@
-package com.example.student.tensorflowmobiledemo;
+package com.example.student.ResourcesUsagePrediction;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
@@ -8,13 +8,13 @@ import android.arch.persistence.room.Query;
 import java.util.List;
 
 @Dao
-public interface RecordDao {
-    @Query("SELECT * FROM Record")
-    List<Record> getAll();
+public interface StatusDao {
+    @Query("SELECT * FROM Status")
+    List<Status> getAll();
 
     @Insert
-    void insertAll(Record... records);
+    void insertAll(Status... statuses);
 
     @Delete
-    void delete(Record record);
+    void delete(Status status);
 }

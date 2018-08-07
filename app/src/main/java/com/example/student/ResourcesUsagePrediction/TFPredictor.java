@@ -1,11 +1,11 @@
-package com.example.student.tensorflowmobiledemo;
+package com.example.student.ResourcesUsagePrediction;
 
 import android.content.res.AssetManager;
 
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
 /**
- * TensorFlow Mobile predictor using pre-trained model to infer the result
+ * TensorFlow Mobile predictor using pre-trained model to make inference on the result
  */
 public class TFPredictor {
     private static String modelFile;

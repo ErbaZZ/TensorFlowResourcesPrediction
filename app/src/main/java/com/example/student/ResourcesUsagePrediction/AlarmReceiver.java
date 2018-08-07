@@ -1,4 +1,4 @@
-package com.example.student.tensorflowmobiledemo;
+package com.example.student.ResourcesUsagePrediction;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

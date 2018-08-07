@@ -1,4 +1,4 @@
-package com.example.student.tensorflowmobiledemo;
+package com.example.student.ResourcesUsagePrediction;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
@@ -16,6 +16,9 @@ import android.util.Log;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * Class for getting current Android phone statuses without the use of BroadcastReceiver
+ */
 public class StatusRecorder{
 
     private Context context;                        // Application Context

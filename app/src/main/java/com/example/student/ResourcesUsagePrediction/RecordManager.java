@@ -1,4 +1,4 @@
-package com.example.student.tensorflowmobiledemo;
+package com.example.student.ResourcesUsagePrediction;
 
 import android.util.Log;
 

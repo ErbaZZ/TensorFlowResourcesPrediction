@@ -1,4 +1,4 @@
-package com.example.student.tensorflowmobiledemo;
+package com.example.student.ResourcesUsagePrediction;
 
 import android.app.IntentService;
 import android.arch.persistence.room.Room;
@@ -19,7 +19,6 @@ public class RecordService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        // TODO: Add repeated tasks
         Log.i("Service Status","Running");
         StatusRecorder statusRecorder = new StatusRecorder(this.getApplicationContext());
         statusRecorder.updateStatuses();
@@ -29,11 +28,6 @@ public class RecordService extends IntentService {
         Log.d("Result", "Predicted: " + predicted + ", Actual: " + actual);
         RecordManager.addResult(predicted, actual);
         RecordManager.addRecord(statuses);
-
-        /*Intent i = new Intent(this, MainActivity.class);
-        i.setAction(Intent.ACTION_SEND);
-        i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(i);*/
         sendTrigger();
     }
 
